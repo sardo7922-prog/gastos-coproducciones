@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gastos Coproducciones">
+<meta name="theme-color" content="#0c0e17">
+<title>Gastos Coproducciones</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#0c0e17;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding-bottom:80px}
+input,select,textarea,button{font-family:inherit;-webkit-appearance:none;appearance:none}
+::-webkit-scrollbar{display:none}
+.hdr{background:#141627;border-bottom:1px solid #1e2235;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.hdr-title{font-size:17px;font-weight:800;flex:1;color:#c9d1d9}
+.btn-primary{background:#6366f1;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-ghost{background:none;border:1px solid #1e2235;border-radius:8px;padding:7px 12px;font-size:12px;color:#4a5568;cursor:pointer}
+.btn-danger{background:none;border:1px solid #1e2235;border-radius:8px;padding:7px 12px;font-size:12px;color:#ef4444;cursor:pointer}
+.back-btn{background:none;border:none;color:#6366f1;font-size:15px;font-weight:700;cursor:pointer;padding:0}
+.main{padding:16px;max-width:680px;margin:0 auto;padding-bottom:60px}
+.loc-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px}
+.loc-lotus{background:#3730a3;color:#a5b4fc}
+.loc-taura{background:#92400e;color:#fcd34d}
+.mes-card{background:#141627;border:1px solid #1e2235;border-radius:14px;padding:18px;margin-bottom:12px;cursor:pointer}
+.mes-nombre{font-size:20px;font-weight:800;color:#c9d1d9;margin-bottom:3px}
+.mes-cnt{font-size:13px;color:#4a5568;margin-bottom:14px}
+.mes-pills{display:flex;gap:6px;flex-wrap:wrap;padding-top:12px;border-top:1px solid #1e2235}
+.pill{font-size:12px;color:#4a5568;background:#0c0e17;padding:3px 10px;border-radius:20px;border-left:3px solid}
+.copro-card{background:#141627;border:1px solid #1e2235;border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;border-left:4px solid}
+.resumen{background:#141627;border:1px solid #1e2235;border-radius:14px;padding:18px;margin-bottom:20px}
+.rubro-tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:#1e2235;color:#4a5568;margin-bottom:4px;margin-right:4px}
+.gasto-card{background:#141627;border:1px solid #1e2235;border-radius:14px;margin-bottom:10px;overflow:hidden}
+.gasto-body{display:flex;align-items:flex-start;gap:14px;padding:16px}
+.gasto-actions{display:flex;gap:8px;padding:10px 16px;border-top:1px solid #1e2235}
+.gasto-img{width:100%;max-height:180px;object-fit:cover;border-top:1px solid #1e2235;display:block;cursor:pointer}
+.field-lbl{font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px}
+.field-inp{width:100%;background:#0c0e17;border:1px solid #1e2235;border-radius:10px;padding:12px 14px;color:#c9d1d9;font-size:15px;outline:none}
+.field-inp:focus{border-color:#6366f1}
+.field-sel{width:100%;background:#0c0e17;border:1px solid #1e2235;border-radius:10px;padding:12px 14px;color:#c9d1d9;font-size:15px;outline:none}
+.field-ta{width:100%;background:#0c0e17;border:1px solid #1e2235;border-radius:10px;padding:12px 14px;color:#c9d1d9;font-size:15px;outline:none;resize:vertical;min-height:80px}
+.field-wrap{margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.loc-btns{display:flex;gap:10px}
+.loc-btn{flex:1;padding:12px;border-radius:10px;border:1px solid #1e2235;background:#0c0e17;color:#4a5568;font-size:14px;font-weight:700;cursor:pointer}
+.sel-lotus{background:#3730a3;border-color:#6366f1;color:#a5b4fc}
+.sel-taura{background:#92400e;border-color:#f59e0b;color:#fcd34d}
+.color-row{display:flex;gap:10px;flex-wrap:wrap}
+.cdot{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent}
+.cdot.sel{border-color:white}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:#141627;border-radius:20px 20px 0 0;width:100%;max-width:680px;padding:24px 20px;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal-title{font-size:18px;font-weight:800;color:#c9d1d9;margin-bottom:20px}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+.mbtn-cancel{flex:1;background:none;border:1px solid #1e2235;border-radius:12px;color:#4a5568;font-size:15px;padding:13px;cursor:pointer}
+.mbtn-save{flex:2;background:#6366f1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;padding:13px;cursor:pointer}
+.mbtn-del{flex:2;background:#ef4444;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;padding:13px;cursor:pointer}
+.attach-btn{width:100%;background:#0c0e17;border:1px dashed #1e2235;border-radius:10px;padding:16px;color:#4a5568;cursor:pointer;font-size:14px;text-align:center;display:block}
+.empty{text-align:center;padding:60px 20px;color:#4a5568}
+.empty .ei{font-size:48px;margin-bottom:14px}
+.toast{display:none;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1e2235;border:1px solid #2e3450;border-radius:12px;padding:12px 24px;font-size:14px;color:#c9d1d9;z-index:400;white-space:nowrap}
+.toast.show{display:block}
+.img-full{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;align-items:center;justify-content:center;cursor:pointer}
+.img-full.open{display:flex}
+.img-full img{max-width:95%;max-height:90vh;border-radius:12px}
+.spinner-wrap{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:14px}
+.spinner{width:36px;height:36px;border:3px solid #1e2235;border-top-color:#6366f1;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+select option{background:#141627}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;margin-left:6px}
+.sync-dot.off{background:#ef4444}
+</style>
+</head>
+<body>
+
+<div id="root"><div class="spinner-wrap"><div class="spinner"></div><p style="color:#4a5568;font-size:14px">Conectando...</p></div></div>
+
+<div class="overlay" id="ovCopro" onclick="closeOv('ovCopro')">
+<div class="modal" onclick="event.stopPropagation()">
+  <div class="modal-title" id="titleCopro">Nueva coproduccion</div>
+  <div class="field-wrap"><label class="field-lbl">Nombre del evento</label><input class="field-inp" id="fN" placeholder="Ej: Viernes electronico"/></div>
+  <div class="field-wrap"><label class="field-lbl">Fecha del evento</label><input class="field-inp" id="fF" type="date"/></div>
+  <div class="field-wrap">
+    <label class="field-lbl">Locacion <span style="color:#ef4444">*</span></label>
+    <div class="loc-btns"><button class="loc-btn" id="btnLotus" onclick="pickLoc('Lotus')">Lotus</button><button class="loc-btn" id="btnTaura" onclick="pickLoc('Taura')">Taura</button></div>
+  </div>
+  <div class="field-wrap"><label class="field-lbl">Color</label><div class="color-row" id="colorRow"></div></div>
+  <div class="modal-btns"><button class="mbtn-cancel" onclick="closeOv('ovCopro')">Cancelar</button><button class="mbtn-save" onclick="saveCopro()">Guardar</button></div>
+</div>
+</div>
+
+<div class="overlay" id="ovGasto" onclick="closeOv('ovGasto')">
+<div class="modal" onclick="event.stopPropagation()">
+  <div class="modal-title" id="titleGasto">Nuevo gasto</div>
+  <div class="field-wrap"><label class="field-lbl">Registrado por <span style="color:#ef4444">*</span></label>
+    <select class="field-sel" id="gU"><option value="">Selecciona...</option><option>Pato</option><option>Pope</option><option>Rodri</option><option>Javi</option><option>Belu</option></select>
+  </div>
+  <div class="field-wrap"><label class="field-lbl">Rubro</label>
+    <select class="field-sel" id="gR"><option value="">Selecciona...</option><option>Alquiler</option><option>Estructura</option><option>DJ / Artista</option><option>Seguridad</option><option>Produccion</option><option>Barra</option><option>Publicidad</option><option>Personal</option><option>Otro</option></select>
+  </div>
+  <div class="field-wrap"><label class="field-lbl">Proveedor / Destinatario</label><input class="field-inp" id="gP" placeholder="Nombre..."/></div>
+  <div class="grid2">
+    <div class="field-wrap"><label class="field-lbl">Monto</label><input class="field-inp" id="gM" type="number" placeholder="0"/></div>
+    <div class="field-wrap"><label class="field-lbl">Fecha</label><input class="field-inp" id="gF" type="date"/></div>
+  </div>
+  <div class="field-wrap"><label class="field-lbl">Forma de pago</label>
+    <select class="field-sel" id="gFo"><option>Efectivo</option><option>Transferencia</option><option>Cheque</option><option>Tarjeta</option><option>Otro</option></select>
+  </div>
+  <div class="field-wrap"><label class="field-lbl">Descripcion (opcional)</label><textarea class="field-ta" id="gD" placeholder="Detalle..."></textarea></div>
+  <div class="field-wrap"><label class="field-lbl">Comprobante (opcional)</label>
+    <input type="file" id="gFile" accept="image/*" style="display:none" onchange="handleImg(event)"/>
+    <div id="imgArea"></div>
+  </div>
+  <div class="modal-btns"><button class="mbtn-cancel" onclick="closeOv('ovGasto')">Cancelar</button><button class="mbtn-save" onclick="saveGasto()">Guardar</button></div>
+</div>
+</div>
+
+<div class="overlay" id="ovConfirm" onclick="closeOv('ovConfirm')">
+<div class="modal" onclick="event.stopPropagation()" style="max-height:280px">
+  <div class="modal-title" style="color:#ef4444">Eliminar</div>
+  <p id="confirmMsg" style="color:#4a5568;margin-bottom:20px;font-size:15px"></p>
+  <div class="modal-btns"><button class="mbtn-cancel" onclick="closeOv('ovConfirm')">Cancelar</button><button class="mbtn-del" onclick="doConfirm()">Eliminar</button></div>
+</div>
+</div>
+
+<div class="img-full" id="imgFull" onclick="this.classList.remove('open')">
+  <img id="imgFullSrc" src="" alt=""/>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+var SUPA_URL = "https://ixicfzjymhpaobqeveom.supabase.co";
+var SUPA_KEY = "sb_publishable_SWvGfDciV6Zq9mAV6F1dsA_r7BCpRLZ";
+var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+var MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+var COLORS = ["#6366f1","#3b82f6","#10b981","#f59e0b","#ef4444","#8b5cf6","#ec4899","#06b6d4"];
+
+var db = {copros:[], gastos:[]};
+var view = "meses", mesKey = null, coprId = null, editId = null;
+var selColor = COLORS[0], selLoc = "", curImg = "", pending = null;
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function fmt(n) { var s = Math.round(n||0).toString().replace(/\B(?=(\d{3})+(?!\d))/g,"."); return "$ "+s; }
+function fmtD(d) { if(!d)return""; var p=d.split("-"); return p[2]+"/"+p[1]+"/"+p[0]; }
+function today() { return new Date().toISOString().split("T")[0]; }
+function esc(s) { var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+function toast(msg) { var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(function(){t.classList.remove("show");},2500); }
+function openOv(id) { document.getElementById(id).classList.add("open"); }
+function closeOv(id) { document.getElementById(id).classList.remove("open"); }
+function locBadge(loc) { if(!loc)return""; var cls=loc==="Lotus"?"loc-lotus":"loc-taura"; return'<span class="loc-badge '+cls+'">'+loc+'</span>'; }
+function getGrupos() {
+  var m={};
+  db.copros.forEach(function(c){ var k=c.fecha?c.fecha.slice(0,7):"sin-fecha"; if(!m[k])m[k]={key:k,items:[]}; m[k].items.push(c); });
+  return Object.values(m).sort(function(a,b){return b.key>a.key?1:-1;});
+}
+function mesLabel(k) { if(k==="sin-fecha")return"Sin fecha"; var p=k.split("-"); return MESES[parseInt(p[1])-1]+" "+p[0]; }
+function totCopro(id) { return db.gastos.filter(function(g){return g.copro_id===id;}).reduce(function(s,g){return s+Number(g.monto||0);},0); }
+function buildColors() {
+  document.getElementById("colorRow").innerHTML=COLORS.map(function(c){
+    return'<div class="cdot'+(c===selColor?" sel":"")+'" style="background:'+c+'" onclick="pickColor(\''+c+'\')"></div>';
+  }).join("");
+}
+function pickColor(c){selColor=c;buildColors();}
+function pickLoc(l){
+  selLoc=l;
+  document.getElementById("btnLotus").className="loc-btn"+(l==="Lotus"?" sel-lotus":"");
+  document.getElementById("btnTaura").className="loc-btn"+(l==="Taura"?" sel-taura":"");
+}
+
+async function loadData() {
+  try {
+    var r1 = await sb.from("copros").select("*");
+    var r2 = await sb.from("gastos").select("*");
+    db.copros = r1.data || [];
+    db.gastos = r2.data || [];
+  } catch(e) { toast("Error al cargar datos"); }
+}
+
+function subscribeRealtime() {
+  sb.channel("cambios")
+    .on("postgres_changes", {event:"*", schema:"public", table:"copros"}, function() { loadData().then(render); })
+    .on("postgres_changes", {event:"*", schema:"public", table:"gastos"}, function() { loadData().then(render); })
+    .subscribe();
+}
+
+function render() {
+  if(view==="meses") renderMeses();
+  else if(view==="copros") renderCopros();
+  else if(view==="detalle") renderDetalle();
+}
+
+function renderMeses() {
+  var gs=getGrupos();
+  var h='<div class="hdr"><span style="font-size:18px">&#127881;</span><span class="hdr-title" style="margin-left:8px">Gastos Coproducciones<span class="sync-dot" title="Conectado"></span></span><button class="btn-primary" onclick="openFormCopro()">+ Nueva</button></div><div class="main">';
+  if(!gs.length){ h+='<div class="empty"><div class="ei">&#127881;</div><p>No hay coproducciones.<br>Crea la primera.</p></div>'; }
+  gs.forEach(function(g){
+    var pills=g.items.map(function(c){ return'<span class="pill" style="border-left-color:'+c.color+'">'+esc(c.nombre)+'</span>'; }).join("");
+    h+='<div class="mes-card" onclick="mesKey=\''+g.key+'\';view=\'copros\';render()">' +
+      '<div class="mes-nombre">'+mesLabel(g.key)+'</div>' +
+      '<div class="mes-cnt">'+g.items.length+(g.items.length!==1?" eventos":" evento")+'</div>' +
+      '<div class="mes-pills">'+pills+'</div></div>';
+  });
+  h+='</div>';
+  document.getElementById("root").innerHTML=h;
+}
+
+function renderCopros() {
+  var g=getGrupos().find(function(x){return x.key===mesKey;});
+  if(!g){view="meses";render();return;}
+  var tot=g.items.reduce(function(s,c){return s+totCopro(c.id);},0);
+  var h='<div class="hdr"><button class="back-btn" onclick="view=\'meses\';render()">&#8592; Volver</button>' +
+    '<span class="hdr-title" style="margin-left:10px">'+mesLabel(mesKey)+'</span>' +
+    '<button class="btn-primary" onclick="openFormCopro()">+ Nueva</button></div><div class="main">' +
+    '<div class="resumen"><div style="font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Total del mes</div>' +
+    '<div style="font-size:30px;font-weight:800;color:#6366f1">'+fmt(tot)+'</div>' +
+    '<div style="font-size:13px;color:#4a5568;margin-top:4px">'+g.items.length+(g.items.length!==1?" coproducciones":" coproduccion")+'</div></div>';
+  g.items.forEach(function(c){
+    var ct=totCopro(c.id); var cnt=db.gastos.filter(function(x){return x.copro_id===c.id;}).length;
+    var finTag=c.finalizado?'<span style="font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;background:#064e3b;color:#6ee7b7">&#10003; Liquidado</span>':"";
+    var op=c.finalizado?"opacity:.55;":"";
+    h+='<div class="copro-card" style="border-left-color:'+c.color+';'+op+'" onclick="coprId=\''+c.id+'\';view=\'detalle\';render()">' +
+      '<div style="display:flex;align-items:flex-start;gap:8px">' +
+      '<div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+      '<span style="font-size:16px;font-weight:700">'+esc(c.nombre)+'</span>'+locBadge(c.locacion)+finTag+'</div>' +
+      (c.fecha?'<div style="font-size:12px;color:#4a5568">&#128197; '+fmtD(c.fecha)+'</div>':"")+'</div>' +
+      '<button class="btn-ghost" onclick="event.stopPropagation();openEditCopro(\''+c.id+'\')">&#9999;&#65039;</button>' +
+      '<button class="btn-danger" onclick="event.stopPropagation();askDel(\'copro\',\''+c.id+'\')">&#128465;&#65039;</button>' +
+      '</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">' +
+      '<span style="font-size:13px;color:#4a5568">'+cnt+(cnt!==1?" gastos":" gasto")+'</span>' +
+      '<span style="font-size:18px;font-weight:800;color:'+c.color+'">'+fmt(ct)+'</span></div></div>';
+  });
+  h+='</div>';
+  document.getElementById("root").innerHTML=h;
+}
+
+function renderDetalle() {
+  var c=db.copros.find(function(x){return x.id===coprId;});
+  if(!c){view="copros";render();return;}
+  var gs=db.gastos.filter(function(g){return g.copro_id===coprId;}).sort(function(a,b){return a.fecha<b.fecha?1:-1;});
+  var tot=gs.reduce(function(s,g){return s+Number(g.monto||0);},0);
+  var finBanner=c.finalizado
+    ?'<div style="background:#064e3b;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between"><span style="color:#6ee7b7;font-weight:700;font-size:14px">&#10003; Evento liquidado</span><button onclick="toggleFinalizado(\''+c.id+'\')" style="background:none;border:1px solid #6ee7b7;border-radius:8px;color:#6ee7b7;font-size:12px;padding:5px 10px;cursor:pointer">Reabrir</button></div>'
+    :'<button onclick="toggleFinalizado(\''+c.id+'\')" style="width:100%;background:none;border:1px solid #1e2235;border-radius:10px;color:#4a5568;font-size:14px;font-weight:700;padding:12px;cursor:pointer;margin-bottom:16px">&#10003; Marcar como liquidado</button>';
+  var h='<div class="hdr"><button class="back-btn" onclick="view=\'copros\';render()">&#8592; Volver</button>' +
+    '<div style="flex:1;margin-left:10px">' +
+    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+    '<span style="font-size:15px;font-weight:800;color:'+c.color+'">'+esc(c.nombre)+'</span>'+locBadge(c.locacion)+
+    (c.finalizado?'<span style="font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;background:#064e3b;color:#6ee7b7">Liquidado</span>':"")+'</div>'+
+    (c.fecha?'<div style="font-size:12px;color:#4a5568">&#128197; '+fmtD(c.fecha)+'</div>':"")+'</div>'+
+    (!c.finalizado?'<button class="btn-primary" onclick="openFormGasto()">+ Gasto</button>':"")+'</div><div class="main">'+
+    finBanner+
+    '<div class="resumen"><div style="font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Total gastado</div>'+
+    '<div style="font-size:30px;font-weight:800;color:'+c.color+'">'+fmt(tot)+'</div>'+
+    '<div style="font-size:13px;color:#4a5568;margin-top:4px">'+gs.length+(gs.length!==1?" gastos":" gasto")+'</div></div>';
+  if(!gs.length){ h+='<div class="empty"><div class="ei">&#128203;</div><p>Sin gastos. Toca "+ Gasto".</p></div>'; }
+  gs.forEach(function(g){
+    h+='<div class="gasto-card"><div class="gasto-body"><div style="flex:1">'+
+      (g.rubro?'<span class="rubro-tag">'+esc(g.rubro)+'</span>':"") +
+      (g.usuario?'<span class="rubro-tag" style="background:#1a1d30;color:#6366f1">&#128100; '+esc(g.usuario)+'</span>':"") +
+      '<div style="font-size:15px;font-weight:600;margin-bottom:3px;margin-top:4px">'+esc(g.proveedor)+'</div>'+
+      '<div style="font-size:12px;color:#4a5568">'+fmtD(g.fecha)+' &middot; '+esc(g.forma)+'</div>'+
+      (g.descripcion?'<div style="font-size:13px;color:#4a5568;margin-top:3px">'+esc(g.descripcion)+'</div>':"")+'</div>'+
+      '<div style="font-size:16px;font-weight:800;color:#ef4444;flex-shrink:0">- '+fmt(g.monto)+'</div></div>'+
+      (g.img?'<img src="'+g.img+'" class="gasto-img" onclick="showImg(\''+g.id+'\')" />':"") +
+      '<div class="gasto-actions"><button class="btn-ghost" style="flex:1" onclick="openEditGasto(\''+g.id+'\')">&#9999;&#65039; Editar</button>'+
+      '<button class="btn-danger" style="flex:1" onclick="askDel(\'gasto\',\''+g.id+'\')">&#128465;&#65039; Eliminar</button></div></div>';
+  });
+  h+='</div>';
+  document.getElementById("root").innerHTML=h;
+}
+
+function openFormCopro() {
+  editId=null;selColor=COLORS[0];selLoc="";
+  document.getElementById("titleCopro").textContent="Nueva coproduccion";
+  document.getElementById("fN").value="";document.getElementById("fF").value=today();
+  document.getElementById("btnLotus").className="loc-btn";document.getElementById("btnTaura").className="loc-btn";
+  buildColors();openOv("ovCopro");
+}
+function openEditCopro(id) {
+  var c=db.copros.find(function(x){return x.id===id;});
+  editId=id;selColor=c.color;selLoc=c.locacion||"";
+  document.getElementById("titleCopro").textContent="Editar coproduccion";
+  document.getElementById("fN").value=c.nombre;document.getElementById("fF").value=c.fecha||"";
+  document.getElementById("btnLotus").className="loc-btn"+(selLoc==="Lotus"?" sel-lotus":"");
+  document.getElementById("btnTaura").className="loc-btn"+(selLoc==="Taura"?" sel-taura":"");
+  buildColors();openOv("ovCopro");
+}
+async function saveCopro() {
+  var nombre=document.getElementById("fN").value.trim();
+  var fecha=document.getElementById("fF").value;
+  if(!nombre)return;
+  if(!selLoc){toast("Selecciona una locacion");return;}
+  var rec={id:editId||uid(),nombre:nombre,fecha:fecha,color:selColor,locacion:selLoc,finalizado:false};
+  if(editId){var old=db.copros.find(function(x){return x.id===editId;});rec.finalizado=old?old.finalizado:false;}
+  await sb.from("copros").upsert(rec);
+  closeOv("ovCopro");
+  if(!editId&&fecha)mesKey=fecha.slice(0,7);
+  if(!editId)view=mesKey?"copros":"meses";
+  await loadData();render();
+  toast(editId?"Actualizado":"Creado");
+}
+
+function openFormGasto() {
+  editId=null;curImg="";
+  document.getElementById("titleGasto").textContent="Nuevo gasto";
+  document.getElementById("gU").value="";document.getElementById("gR").value="";
+  document.getElementById("gP").value="";document.getElementById("gM").value="";
+  document.getElementById("gF").value=today();document.getElementById("gFo").value="Efectivo";
+  document.getElementById("gD").value="";document.getElementById("gFile").value="";
+  renderImgArea();openOv("ovGasto");
+}
+function openEditGasto(id) {
+  var g=db.gastos.find(function(x){return x.id===id;});
+  editId=id;curImg=g.img||"";
+  document.getElementById("titleGasto").textContent="Editar gasto";
+  document.getElementById("gU").value=g.usuario||"";document.getElementById("gR").value=g.rubro||"";
+  document.getElementById("gP").value=g.proveedor;document.getElementById("gM").value=g.monto;
+  document.getElementById("gF").value=g.fecha||"";document.getElementById("gFo").value=g.forma;
+  document.getElementById("gD").value=g.descripcion||"";
+  renderImgArea();openOv("ovGasto");
+}
+async function saveGasto() {
+  var prov=document.getElementById("gP").value.trim();var monto=document.getElementById("gM").value;
+  if(!prov||!monto)return;
+  var rec={id:editId||uid(),copro_id:coprId,usuario:document.getElementById("gU").value,
+    rubro:document.getElementById("gR").value,proveedor:prov,monto:Number(monto),
+    fecha:document.getElementById("gF").value,forma:document.getElementById("gFo").value,
+    descripcion:document.getElementById("gD").value.trim(),img:curImg};
+  await sb.from("gastos").upsert(rec);
+  closeOv("ovGasto");await loadData();render();toast("Gasto guardado");
+}
+
+async function toggleFinalizado(id) {
+  var c=db.copros.find(function(x){return x.id===id;});
+  if(!c)return;
+  await sb.from("copros").update({finalizado:!c.finalizado}).eq("id",id);
+  await loadData();render();
+  toast(c.finalizado?"Evento reabierto":"Evento liquidado");
+}
+
+function handleImg(e) {
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    var img=new Image();
+    img.onload=function(){
+      var canvas=document.createElement("canvas");
+      var MAX=800;
+      var w=img.width,h=img.height;
+      if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}
+      else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}
+      canvas.width=w;canvas.height=h;
+      var ctx=canvas.getContext("2d");
+      ctx.drawImage(img,0,0,w,h);
+      curImg=canvas.toDataURL("image/jpeg",0.7);
+      renderImgArea();
+    };
+    img.src=ev.target.result;
+  };
+  r.readAsDataURL(f);
+}
+function renderImgArea() {
+  var a=document.getElementById("imgArea");if(!a)return;
+  a.innerHTML=curImg
+    ?'<div style="position:relative"><img src="'+curImg+'" style="width:100%;max-height:150px;object-fit:cover;border-radius:10px;display:block"/><button onclick="curImg=\'\';renderImgArea()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer">Quitar</button></div>'
+    :'<button class="attach-btn" onclick="document.getElementById(\'gFile\').click()">Adjuntar imagen</button>';
+}
+function showImg(id) {
+  var g=db.gastos.find(function(x){return x.id===id;});
+  if(!g||!g.img)return;
+  document.getElementById("imgFullSrc").src=g.img;
+  document.getElementById("imgFull").classList.add("open");
+}
+
+function askDel(type,id) {
+  var item=type==="copro"?db.copros.find(function(x){return x.id===id;}):db.gastos.find(function(x){return x.id===id;});
+  var nombre=item?esc(item.nombre||item.proveedor):"";
+  document.getElementById("confirmMsg").innerHTML=type==="copro"
+    ?"Eliminar <strong style='color:#c9d1d9'>\""+nombre+"\"</strong> y todos sus gastos?"
+    :"Eliminar el gasto de <strong style='color:#c9d1d9'>\""+nombre+"\"</strong>?";
+  pending=type==="copro"
+    ?async function(){
+        await sb.from("gastos").delete().eq("copro_id",id);
+        await sb.from("copros").delete().eq("id",id);
+        closeOv("ovConfirm");if(coprId===id){view="copros";coprId=null;}
+        await loadData();render();toast("Eliminado");
+      }
+    :async function(){
+        await sb.from("gastos").delete().eq("id",id);
+        closeOv("ovConfirm");await loadData();render();toast("Gasto eliminado");
+      };
+  openOv("ovConfirm");
+}
+function doConfirm(){if(pending)pending();}
+
+(async function init() {
+  await loadData();
+  render();
+  subscribeRealtime();
+})();
+</script>
+</body>
+</html>
