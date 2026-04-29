@@ -94,17 +94,20 @@ select option{background:#141627}
 <div class="overlay" id="ovGasto" onclick="closeOv('ovGasto')">
 <div class="modal" onclick="event.stopPropagation()">
   <div class="modal-title" id="titleGasto">Nuevo gasto</div>
-  <div class="field-wrap"><label class="field-lbl">Registrado por <span style="color:#ef4444">*</span></label>
-    <select class="field-sel" id="gU"><option value="">Selecciona...</option><option>Pato</option><option>Pope</option><option>Rodri</option><option>Javi</option><option>Belu</option></select>
-  </div>
+  <div class="field-wrap"><label class="field-lbl">Nombre de quien registra</label><input class="field-inp" id="gU" placeholder="Tu nombre..."/></div>
   <div class="field-wrap"><label class="field-lbl">Rubro</label>
-    <select class="field-sel" id="gR"><option value="">Selecciona...</option><option>Alquiler</option><option>Estructura</option><option>DJ / Artista</option><option>Seguridad</option><option>Produccion</option><option>Barra</option><option>Publicidad</option><option>Personal</option><option>Otro</option></select>
+    <select class="field-sel" id="gR" onchange="toggleRubroDetalle()"><option value="">Selecciona...</option><option>Alquiler</option><option>Estructura</option><option>DJ / Artista</option><option>Seguridad</option><option>Produccion</option><option>Barra</option><option>Publicidad</option><option>Personal</option><option>Otro</option></select>
   </div>
+  <div class="field-wrap" id="rubroDetalleWrap" style="display:none"><label class="field-lbl">Detalle del rubro</label><input class="field-inp" id="gRD" placeholder="Especifica el rubro..."/></div>
   <div class="field-wrap"><label class="field-lbl">Proveedor / Destinatario</label><input class="field-inp" id="gP" placeholder="Nombre..."/></div>
   <div class="grid2">
     <div class="field-wrap"><label class="field-lbl">Monto</label><input class="field-inp" id="gM" type="number" placeholder="0"/></div>
     <div class="field-wrap"><label class="field-lbl">Fecha</label><input class="field-inp" id="gF" type="date"/></div>
   </div>
+  <div class="field-wrap"><label class="field-lbl">Estado</label>
+    <select class="field-sel" id="gE"><option value="No pagado">No pagado</option><option value="Pagado">Pagado</option></select>
+  </div>
+  <div class="field-wrap"><label class="field-lbl">Quien abono</label><input class="field-inp" id="gQ" placeholder="Nombre de quien abono..."/></div>
   <div class="field-wrap"><label class="field-lbl">Forma de pago</label>
     <select class="field-sel" id="gFo"><option>Efectivo</option><option>Transferencia</option><option>Cheque</option><option>Tarjeta</option><option>Otro</option></select>
   </div>
@@ -259,10 +262,12 @@ function renderDetalle() {
   if(!gs.length){ h+='<div class="empty"><div class="ei">&#128203;</div><p>Sin gastos. Toca "+ Gasto".</p></div>'; }
   gs.forEach(function(g){
     h+='<div class="gasto-card"><div class="gasto-body"><div style="flex:1">'+
-      (g.rubro?'<span class="rubro-tag">'+esc(g.rubro)+'</span>':"") +
+      (g.rubro?'<span class="rubro-tag">'+esc(g.rubro==="Otro"&&g.rubro_detalle?g.rubro_detalle:g.rubro)+'</span>':"") +
+      (g.estado?'<span class="rubro-tag" style="background:'+(g.estado==="Pagado"?"#064e3b":"#3b1a1a")+';color:'+(g.estado==="Pagado"?"#6ee7b7":"#ef4444")+'">'+esc(g.estado)+'</span>':"") +
       (g.usuario?'<span class="rubro-tag" style="background:#1a1d30;color:#6366f1">&#128100; '+esc(g.usuario)+'</span>':"") +
-      '<div style="font-size:15px;font-weight:600;margin-bottom:3px;margin-top:4px">'+esc(g.proveedor)+'</div>'+
+      '<div style="font-size:15px;font-weight:600;margin-bottom:3px;margin-top:6px">'+esc(g.proveedor)+'</div>'+
       '<div style="font-size:12px;color:#4a5568">'+fmtD(g.fecha)+' &middot; '+esc(g.forma)+'</div>'+
+      (g.quien_abono?'<div style="font-size:12px;color:#4a5568;margin-top:2px">Abono: '+esc(g.quien_abono)+'</div>':"") +
       (g.descripcion?'<div style="font-size:13px;color:#4a5568;margin-top:3px">'+esc(g.descripcion)+'</div>':"")+'</div>'+
       '<div style="font-size:16px;font-weight:800;color:#ef4444;flex-shrink:0">- '+fmt(g.monto)+'</div></div>'+
       (g.img?'<img src="'+g.img+'" class="gasto-img" onclick="showImg(\''+g.id+'\')" />':"") +
@@ -304,12 +309,24 @@ async function saveCopro() {
   toast(editId?"Actualizado":"Creado");
 }
 
+function toggleRubroDetalle() {
+  var val=document.getElementById("gR").value;
+  document.getElementById("rubroDetalleWrap").style.display=val==="Otro"?"block":"none";
+  if(val!=="Otro")document.getElementById("gRD").value="";
+}
+
 function openFormGasto() {
   editId=null;curImg="";
   document.getElementById("titleGasto").textContent="Nuevo gasto";
-  document.getElementById("gU").value="";document.getElementById("gR").value="";
+  document.getElementById("gU").value="";
+  document.getElementById("gR").value="";
+  document.getElementById("gRD").value="";
+  document.getElementById("rubroDetalleWrap").style.display="none";
   document.getElementById("gP").value="";document.getElementById("gM").value="";
-  document.getElementById("gF").value=today();document.getElementById("gFo").value="Efectivo";
+  document.getElementById("gF").value=today();
+  document.getElementById("gE").value="No pagado";
+  document.getElementById("gQ").value="";
+  document.getElementById("gFo").value="Efectivo";
   document.getElementById("gD").value="";document.getElementById("gFile").value="";
   renderImgArea();openOv("ovGasto");
 }
@@ -317,18 +334,30 @@ function openEditGasto(id) {
   var g=db.gastos.find(function(x){return x.id===id;});
   editId=id;curImg=g.img||"";
   document.getElementById("titleGasto").textContent="Editar gasto";
-  document.getElementById("gU").value=g.usuario||"";document.getElementById("gR").value=g.rubro||"";
+  document.getElementById("gU").value=g.usuario||"";
+  document.getElementById("gR").value=g.rubro||"";
+  document.getElementById("gRD").value=g.rubro_detalle||"";
+  document.getElementById("rubroDetalleWrap").style.display=g.rubro==="Otro"?"block":"none";
   document.getElementById("gP").value=g.proveedor;document.getElementById("gM").value=g.monto;
-  document.getElementById("gF").value=g.fecha||"";document.getElementById("gFo").value=g.forma;
+  document.getElementById("gF").value=g.fecha||"";
+  document.getElementById("gE").value=g.estado||"No pagado";
+  document.getElementById("gQ").value=g.quien_abono||"";
+  document.getElementById("gFo").value=g.forma;
   document.getElementById("gD").value=g.descripcion||"";
   renderImgArea();openOv("ovGasto");
 }
 async function saveGasto() {
   var prov=document.getElementById("gP").value.trim();var monto=document.getElementById("gM").value;
   if(!prov||!monto)return;
-  var rec={id:editId||uid(),copro_id:coprId,usuario:document.getElementById("gU").value,
-    rubro:document.getElementById("gR").value,proveedor:prov,monto:Number(monto),
-    fecha:document.getElementById("gF").value,forma:document.getElementById("gFo").value,
+  var rec={id:editId||uid(),copro_id:coprId,
+    usuario:document.getElementById("gU").value,
+    rubro:document.getElementById("gR").value,
+    rubro_detalle:document.getElementById("gRD").value.trim(),
+    proveedor:prov,monto:Number(monto),
+    fecha:document.getElementById("gF").value,
+    estado:document.getElementById("gE").value,
+    quien_abono:document.getElementById("gQ").value.trim(),
+    forma:document.getElementById("gFo").value,
     descripcion:document.getElementById("gD").value.trim(),img:curImg};
   await sb.from("gastos").upsert(rec);
   closeOv("ovGasto");await loadData();render();toast("Gasto guardado");
